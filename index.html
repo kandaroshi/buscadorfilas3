@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Buscador Filamentos Hoho3d</title>
+<title>Hoho3d Filamentos - Buscador y Recomendaciones</title>
 <style>
   /* Reset y base */
   body {
@@ -11,69 +11,68 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #0a1e2d;
     color: #c3e7f6;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
     padding: 1rem 2rem;
     box-sizing: border-box;
   }
-  h1 {
+  header {
     text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  h1 {
     color: #4ad3e7;
     text-shadow: 0 0 12px #2ca8d8cc;
-    margin-bottom: 0.5rem;
+    margin: 0 0 0.3rem 0;
   }
   header p {
-    text-align: center;
     color: #86d0fb;
     font-style: italic;
-    margin-top: 0;
-    margin-bottom: 2rem;
+    margin: 0;
   }
+
   main {
     display: flex;
+    gap: 2rem;
     justify-content: center;
-    gap: 3rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
-  /* Contenedor de rueda y lista */
-  #color-picker-container {
-    display: flex;
-    flex-direction: column;
+  /* Izquierda - buscador y lista */
+  #left-panel {
     width: 320px;
     max-width: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
-  /* Rueda de color */
-  #color-wheel {
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
-    background: conic-gradient(
-      #ff0000, #ff7f00, #ffff00, #7fff00, #00ff00, #00ff7f,
-      #00ffff, #007fff, #0000ff, #7f00ff, #ff00ff, #ff007f, #ff0000
-    );
-    cursor: pointer;
-    box-shadow: 0 0 18px #22c7ffaa inset;
+  #search-input {
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: 14px;
+    border: none;
+    background: #113249;
+    color: #c3e7f6;
+    box-shadow: inset 0 0 15px #4ad3e7cc;
     margin-bottom: 1rem;
     transition: box-shadow 0.3s ease;
   }
-  #color-wheel:hover {
-    box-shadow: 0 0 32px #38eaffee inset;
+  #search-input:focus {
+    outline: none;
+    box-shadow: 0 0 25px #2fe3a9cc;
+    background: #164765;
   }
 
-  /* Contenedor listado filamentos */
   #search-results {
-    width: 100%;
-    max-height: 220px;
-    overflow-y: auto;
     background: #113249;
     border-radius: 14px;
     padding: 1rem 1.2rem;
     box-shadow: inset 0 0 15px #4ad3e7cc;
     font-size: 1rem;
     color: #a3d9f7;
+    max-height: 400px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -101,7 +100,32 @@
     flex-shrink: 0;
   }
 
-  /* Info seleccionado */
+  /* Centro - rueda + info + botón */
+  #center-panel {
+    flex: 1 1 480px;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #color-wheel {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: conic-gradient(
+      #ff0000, #ff7f00, #ffff00, #7fff00, #00ff00, #00ff7f,
+      #00ffff, #007fff, #0000ff, #7f00ff, #ff00ff, #ff007f, #ff0000
+    );
+    cursor: pointer;
+    box-shadow: 0 0 18px #22c7ffaa inset;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.3s ease;
+  }
+  #color-wheel:hover {
+    box-shadow: 0 0 32px #38eaffee inset;
+  }
+
   #selected-info {
     text-align: center;
     margin-top: 1rem;
@@ -119,7 +143,6 @@
     color: #44c2ff;
   }
 
-  /* Botón ideas */
   #random-idea-btn {
     margin: 2rem auto 0 auto;
     padding: 0.9rem 2.2rem;
@@ -133,6 +156,8 @@
     box-shadow: 0 0 14px #2fe3a9aa;
     transition: background 0.3s ease, box-shadow 0.3s ease;
     user-select: none;
+    max-width: 320px;
+    width: 100%;
   }
   #random-idea-btn:hover {
     background: linear-gradient(90deg, #22d0f2, #33f8b1);
@@ -146,236 +171,520 @@
     color: #7becc5;
     min-height: 50px;
     max-width: 480px;
-    margin-left: auto;
-    margin-right: auto;
+  }
+
+  /* Derecha - info técnica + 3D preview */
+  #right-panel {
+    width: 320px;
+    max-width: 100%;
+    background: #113249;
+    border-radius: 14px;
+    padding: 1rem 1.4rem;
+    box-shadow: inset 0 0 15px #4ad3e7cc;
+    font-size: 1rem;
+    color: #a3d9f7;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  #right-panel h2 {
+    color: #4ad3e7;
+    margin-top: 0;
+    text-align: center;
+    text-shadow: 0 0 12px #2ca8d8cc;
+  }
+  #right-panel .color-box-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    border: 2px solid #7ce2ff;
+    box-shadow: 0 0 12px #4ad3e7cc inset;
+    margin: 0 auto 1rem auto;
+  }
+  #right-panel p {
+    margin: 0.3rem 0;
+    line-height: 1.3;
+    max-width: 280px;
+  }
+  #right-panel strong {
+    color: #67e3ff;
+  }
+
+  /* Canvas 3D */
+  #preview-canvas {
+    width: 280px;
+    height: 280px;
+    border-radius: 20px;
+    background: #0c2c48;
+    box-shadow: 0 0 20px #2fe3a9aa inset;
   }
 
   /* Responsive */
-  @media (max-width: 720px) {
+  @media (max-width: 1100px) {
     main {
-      flex-direction: column;
-      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    #color-picker-container {
+    #left-panel, #right-panel {
       width: 100%;
       max-width: 480px;
+      margin-bottom: 1.8rem;
     }
-    #color-wheel {
+    #center-panel {
+      max-width: 480px;
       width: 100%;
-      height: 280px;
-      margin-bottom: 1.2rem;
+    }
+  }
+  @media (max-width: 480px) {
+    body {
+      padding: 1rem;
     }
   }
 </style>
 </head>
 <body>
-
 <header>
-  <h1>Hoho3d Filamentos - Buscador Avanzado</h1>
-  <p>Tu mejor aliado para encontrar el filamento ideal según color</p>
+  <h1>Hoho3d Filamentos</h1>
+  <p>Busca y visualiza colores para impresión 3D con estilo futurista</p>
 </header>
-
 <main>
-  <section id="color-picker-container" aria-label="Selector y listado de filamentos">
-    <div id="color-wheel" role="slider" aria-valuemin="0" aria-valuemax="360" tabindex="0" aria-label="Rueda de selección de color"></div>
-    <div id="selected-info" aria-live="polite">
-      Color seleccionado: <span id="selected-name">Ninguno</span><br/>
-      HEX: <span id="selected-hex">#------</span>
+  <!-- Panel Izquierdo -->
+  <section id="left-panel" aria-label="Buscador y lista de filamentos">
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Buscar por nombre o código hex (#)..."
+      aria-label="Buscar filamento por nombre o código hexadecimal"
+      autocomplete="off"
+    />
+    <div id="search-results" role="list" tabindex="0" aria-live="polite" aria-relevant="additions"></div>
+  </section>
+
+  <!-- Panel Central -->
+  <section id="center-panel" aria-label="Selector de color y rueda">
+    <div id="color-wheel" role="slider" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0" tabindex="0" aria-label="Selector de color en rueda"></div>
+    <div id="selected-info" aria-live="polite" aria-atomic="true">
+      <div id="selected-name">Selecciona un color</div>
+      <div id="selected-hex"></div>
     </div>
-    <div id="search-results" tabindex="0" aria-label="Lista de filamentos disponibles"></div>
+    <button id="random-idea-btn" aria-describedby="random-idea-output">Generar idea random</button>
+    <div id="random-idea-output" role="alert"></div>
+  </section>
+
+  <!-- Panel Derecho -->
+  <section id="right-panel" aria-label="Información técnica y vista previa 3D">
+    <h2>Detalles del Filamento</h2>
+    <div class="color-box-large" aria-hidden="true"></div>
+    <p><strong>Nombre:</strong> <span id="detail-name">-</span></p>
+    <p><strong>Código Hex:</strong> <span id="detail-hex">-</span></p>
+    <p><strong>Tipo:</strong> <span id="detail-type">-</span></p>
+    <p><strong>Temperatura de impresión:</strong> <span id="detail-temp">-</span></p>
+    <p><strong>Resistencia:</strong> <span id="detail-strength">-</span></p>
+    <canvas id="preview-canvas" width="280" height="280" role="img" aria-label="Vista previa 3D del color seleccionado"></canvas>
   </section>
 </main>
 
-<button id="random-idea-btn" aria-label="Generar idea aleatoria de impresión 3D con colores en stock">
-  💡 Sugerir idea de impresión 3D
-</button>
-<div id="random-idea-output" aria-live="polite"></div>
-
 <script>
-  // Datos de filamentos
+(() => {
+  // Lista de filamentos ejemplo con info técnica
   const filamentos = [
-    {
-      nombre: "Grilon 3 PLA SILK Platino 1.75mm x 1kg",
-      color: "#5b6770",
-      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/silk/grilon-3-pla-silk-platino-175mm-x-1kg-5b6770"
-    },
-    {
-      nombre: "Grilon 3 PLA Piel 720 1.75mm x 1KG",
-      color: "#e7b78a",
-      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-piel-720-175mm-x-1kg-e7b78a"
-    },
-    {
-      nombre: "Grilon 3 PLA Gris Plata 1.75mm x 1kg",
-      color: "#75787b",
-      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-gris-plata-175mm-x-1kg-75787b"
-    }
+    {name: "Azul eléctrico", hex:"#1E90FF", type:"PLA", temp:"190-210°C", strength:"Media"},
+    {name: "Rojo carmesí", hex:"#DC143C", type:"ABS", temp:"220-250°C", strength:"Alta"},
+    {name: "Verde neón", hex:"#39FF14", type:"PLA", temp:"190-210°C", strength:"Media"},
+    {name: "Negro carbón", hex:"#0B0B0B", type:"PETG", temp:"230-250°C", strength:"Alta"},
+    {name: "Blanco perla", hex:"#F0F8FF", type:"PLA", temp:"190-210°C", strength:"Baja"},
+    {name: "Amarillo sol", hex:"#FFD700", type:"PLA", temp:"190-210°C", strength:"Media"},
+    {name: "Naranja fuego", hex:"#FF4500", type:"ABS", temp:"220-250°C", strength:"Alta"},
+    {name: "Morado real", hex:"#800080", type:"PETG", temp:"230-250°C", strength:"Alta"},
+    {name: "Turquesa brillante", hex:"#40E0D0", type:"PLA", temp:"190-210°C", strength:"Media"},
+    {name: "Gris metálico", hex:"#6E7B8B", type:"ABS", temp:"220-250°C", strength:"Alta"},
+    {name: "Rosa neón", hex:"#FF1493", type:"PLA", temp:"190-210°C", strength:"Media"},
+    {name: "Cobre antiguo", hex:"#B87333", type:"PLA", temp:"190-210°C", strength:"Media"},
   ];
 
-  // Selectores DOM
+  // Elementos DOM
+  const searchInput = document.getElementById('search-input');
+  const searchResults = document.getElementById('search-results');
   const colorWheel = document.getElementById('color-wheel');
   const selectedName = document.getElementById('selected-name');
   const selectedHex = document.getElementById('selected-hex');
-  const searchResults = document.getElementById('search-results');
   const randomBtn = document.getElementById('random-idea-btn');
   const randomOutput = document.getElementById('random-idea-output');
 
-  // Variables
-  let selectedColor = null;
+  const detailName = document.getElementById('detail-name');
+  const detailHex = document.getElementById('detail-hex');
+  const detailType = document.getElementById('detail-type');
+  const detailTemp = document.getElementById('detail-temp');
+  const detailStrength = document.getElementById('detail-strength');
+  const colorBoxLarge = document.querySelector('#right-panel .color-box-large');
 
-  // Convertir HEX a RGB
-  function hexToRgb(hex) {
-    const h = hex.replace('#', '');
-    const bigint = parseInt(h, 16);
-    return {
-      r: (bigint >> 16) & 255,
-      g: (bigint >> 8) & 255,
-      b: bigint & 255
-    };
+  // Estado
+  let selectedIndex = null;
+
+  // Función para crear item lista
+  function createListItem(fil, index) {
+    const div = document.createElement('div');
+    div.className = 'color-name';
+    div.tabIndex = 0;
+    div.setAttribute('role','listitem');
+    div.dataset.index = index;
+
+    const box = document.createElement('div');
+    box.className = 'color-box-small';
+    box.style.backgroundColor = fil.hex;
+    box.setAttribute('aria-hidden','true');
+
+    const text = document.createElement('span');
+    text.textContent = fil.name + ' (' + fil.hex.toUpperCase() + ')';
+
+    div.appendChild(box);
+    div.appendChild(text);
+    return div;
   }
 
-  // Distancia Euclidiana en RGB para color cercano
-  function colorDistance(c1, c2) {
-    return Math.sqrt(
-      Math.pow(c1.r - c2.r, 2) +
-      Math.pow(c1.g - c2.g, 2) +
-      Math.pow(c1.b - c2.b, 2)
-    );
-  }
-
-  // Actualizar info seleccionada
-  function updateSelectedColor(color) {
-    selectedColor = color.toUpperCase();
-    const filamento = filamentos.find(f => f.color.toUpperCase() === selectedColor);
-    selectedName.textContent = filamento ? filamento.nombre : 'Color personalizado';
-    selectedHex.textContent = selectedColor;
-    colorWheel.style.boxShadow = `0 0 24px 6px ${selectedColor}aa inset`;
-  }
-
-  // Mostrar todos los filamentos disponibles
-  function showClosestFilaments() {
+  // Render lista filtrada
+  function renderList(filter="") {
     searchResults.innerHTML = '';
-    filamentos.forEach(fil => {
-      const div = document.createElement('div');
-      div.className = 'color-name';
-      div.title = fil.nombre;
-      div.tabIndex = 0;
-      div.setAttribute('role', 'button');
-      div.innerHTML = `
-        <div class="color-box-small" style="background:${fil.color}"></div>
-        <div>${fil.nombre}</div>
-      `;
-      div.onclick = () => {
-        updateSelectedColor(fil.color);
-      };
-      div.onkeydown = e => {
-        if(e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          updateSelectedColor(fil.color);
-        }
-      };
-      searchResults.appendChild(div);
+    const filtered = filamentos.filter(f =>
+      f.name.toLowerCase().includes(filter.toLowerCase()) ||
+      f.hex.toLowerCase().includes(filter.toLowerCase())
+    );
+    if(filtered.length === 0) {
+      searchResults.textContent = "No se encontraron filamentos.";
+      return;
+    }
+    filtered.forEach((fil, i) => {
+      const item = createListItem(fil, filamentos.indexOf(fil));
+      searchResults.appendChild(item);
     });
   }
 
-  // Manejar click o movimiento en la rueda para seleccionar color
-  function pickColorFromWheel(event) {
-    const rect = colorWheel.getBoundingClientRect();
-    const x = event.clientX - rect.left - rect.width/2;
-    const y = event.clientY - rect.top - rect.height/2;
-    const angle = Math.atan2(y, x);
-    const degrees = (angle * 180 / Math.PI + 360) % 360;
-
-    // Convertimos ángulo a color HEX
-    const h = degrees;
-    const s = 100;
-    const l = 50;
-
-    const c = hslToHex(h, s, l);
-    updateSelectedColor(c);
-  }
-
-  // Conversión HSL a HEX
-  function hslToHex(h, s, l) {
-    s /= 100;
-    l /= 100;
-    const c = (1 - Math.abs(2*l - 1)) * s;
-    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-    const m = l - c/2;
-    let r=0, g=0, b=0;
-
-    if (0 <= h && h < 60) {r=c; g=x; b=0;}
-    else if (60 <= h && h < 120) {r=x; g=c; b=0;}
-    else if (120 <= h && h < 180) {r=0; g=c; b=x;}
-    else if (180 <= h && h < 240) {r=0; g=x; b=c;}
-    else if (240 <= h && h < 300) {r=x; g=0; b=c;}
-    else if (300 <= h && h < 360) {r=c; g=0; b=x;}
-
-    r = Math.round((r + m) * 255);
-    g = Math.round((g + m) * 255);
-    b = Math.round((b + m) * 255);
-
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  }
-
-  // Evento para click en rueda
-  colorWheel.addEventListener('click', pickColorFromWheel);
-
-  // Evento para control con teclado (flechas)
-  colorWheel.addEventListener('keydown', e => {
-    if (!selectedColor) updateSelectedColor('#ff0000'); // si no hay color seleccionado inicializar rojo
-    let h = getHueFromHex(selectedColor);
-    if (e.key === 'ArrowRight') {
-      h = (h + 5) % 360;
-      updateSelectedColor(hslToHex(h, 100, 50));
-      e.preventDefault();
+  // Actualizar detalles y vista 3D
+  function updateDetails(index) {
+    if(index === null || !filamentos[index]) {
+      selectedName.textContent = "Selecciona un color";
+      selectedHex.textContent = "";
+      detailName.textContent = "-";
+      detailHex.textContent = "-";
+      detailType.textContent = "-";
+      detailTemp.textContent = "-";
+      detailStrength.textContent = "-";
+      colorBoxLarge.style.backgroundColor = "transparent";
+      clearCanvas();
+      return;
     }
-    else if (e.key === 'ArrowLeft') {
-      h = (h + 355) % 360;
-      updateSelectedColor(hslToHex(h, 100, 50));
+    const fil = filamentos[index];
+    selectedName.textContent = fil.name;
+    selectedHex.textContent = fil.hex.toUpperCase();
+    detailName.textContent = fil.name;
+    detailHex.textContent = fil.hex.toUpperCase();
+    detailType.textContent = fil.type;
+    detailTemp.textContent = fil.temp;
+    detailStrength.textContent = fil.strength;
+    colorBoxLarge.style.backgroundColor = fil.hex;
+
+    // Actualiza aria-valuenow de rueda para accesibilidad (basado en ángulo ficticio)
+    colorWheel.setAttribute('aria-valuenow', index * (360 / filamentos.length));
+
+    // Dibuja cubo 3D con el color seleccionado
+    draw3DPreview(fil.hex);
+  }
+
+  // Dibujo 3D simple con canvas (cubo rotando)
+  const canvas = document.getElementById('preview-canvas');
+  const ctx = canvas.getContext('2d');
+  let angle = 0;
+  let animationId = null;
+  let cubeColor = "#000";
+
+  // Función para limpiar canvas
+  function clearCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Función para dibujar cubo 3D simplificado
+  function drawCube(angle, color) {
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const size = 100;
+
+    // Coordenadas de vértices 3D (simplificado)
+    const vertices3D = [
+      [-1, -1, -1],
+      [1, -1, -1],
+      [1, 1, -1],
+      [-1, 1, -1],
+      [-1, -1, 1],
+      [1, -1, 1],
+      [1, 1, 1],
+      [-1, 1, 1],
+    ];
+
+    // Rotación simple alrededor eje Y
+    const sinA = Math.sin(angle);
+    const cosA = Math.cos(angle);
+
+    function project(vertex) {
+      const [x, y, z] = vertex;
+      // Rotación Y
+      const xRot = x * cosA - z * sinA;
+      const zRot = x * sinA + z * cosA;
+      // Proyección perspectiva sencilla
+      const distance = 3;
+      const scale = 150;
+      const zProj = distance - zRot;
+      const px = cx + (xRot * scale) / zProj;
+      const py = cy + (y * scale) / zProj;
+      return [px, py];
+    }
+
+    // Proyectar vértices
+    const projected = vertices3D.map(project);
+
+    // Aristas del cubo (pares de índices)
+    const edges = [
+      [0,1],[1,2],[2,3],[3,0], // cara trasera
+      [4,5],[5,6],[6,7],[7,4], // cara frontal
+      [0,4],[1,5],[2,6],[3,7], // conectores
+    ];
+
+    // Limpiar y preparar
+    clearCanvas();
+
+    // Dibujar caras rellenas (simplificado)
+    ctx.fillStyle = color;
+    ctx.strokeStyle = '#004455';
+    ctx.lineWidth = 2;
+
+    // Dibujar caras frontales simples (polígonos) para efecto 3D básico
+    // Cara frontal (4,5,6,7)
+    ctx.beginPath();
+    ctx.moveTo(...projected[4]);
+    ctx.lineTo(...projected[5]);
+    ctx.lineTo(...projected[6]);
+    ctx.lineTo(...projected[7]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Cara superior (0,1,5,4)
+    ctx.beginPath();
+    ctx.moveTo(...projected[0]);
+    ctx.lineTo(...projected[1]);
+    ctx.lineTo(...projected[5]);
+    ctx.lineTo(...projected[4]);
+    ctx.closePath();
+    ctx.fillStyle = shadeColor(color, -15);
+    ctx.fill();
+    ctx.stroke();
+
+    // Cara lateral derecha (1,2,6,5)
+    ctx.beginPath();
+    ctx.moveTo(...projected[1]);
+    ctx.lineTo(...projected[2]);
+    ctx.lineTo(...projected[6]);
+    ctx.lineTo(...projected[5]);
+    ctx.closePath();
+    ctx.fillStyle = shadeColor(color, -30);
+    ctx.fill();
+    ctx.stroke();
+
+    // Dibujar aristas
+    ctx.strokeStyle = '#002233';
+    ctx.lineWidth = 1;
+    edges.forEach(([a,b]) => {
+      ctx.beginPath();
+      ctx.moveTo(...projected[a]);
+      ctx.lineTo(...projected[b]);
+      ctx.stroke();
+    });
+  }
+
+  // Función para sombrear color (más oscuro o claro)
+  // amount negativo para oscuro, positivo para claro
+  function shadeColor(color, amount) {
+    let usePound = false;
+    let col = color;
+    if (col[0] === "#") {
+      col = col.slice(1);
+      usePound = true;
+    }
+    let num = parseInt(col,16);
+    let r = (num >> 16) + amount;
+    let g = ((num >> 8) & 0x00FF) + amount;
+    let b = (num & 0x0000FF) + amount;
+
+    r = Math.min(255, Math.max(0,r));
+    g = Math.min(255, Math.max(0,g));
+    b = Math.min(255, Math.max(0,b));
+
+    return (usePound?"#":"") + ( (r << 16) | (g << 8) | b ).toString(16).padStart(6, '0');
+  }
+
+  // Animación
+  function animate() {
+    angle += 0.015;
+    if (angle > Math.PI * 2) angle -= Math.PI * 2;
+    drawCube(angle, cubeColor);
+    animationId = requestAnimationFrame(animate);
+  }
+
+  // Dibuja el cubo y arranca animación
+  function draw3DPreview(hexColor) {
+    cubeColor = hexColor;
+    if(animationId) cancelAnimationFrame(animationId);
+    animate();
+  }
+
+  // Evento click lista
+  searchResults.addEventListener('click', e => {
+    const target = e.target.closest('.color-name');
+    if(!target) return;
+    const idx = parseInt(target.dataset.index);
+    if(!isNaN(idx)) {
+      selectedIndex = idx;
+      updateDetails(selectedIndex);
+    }
+  });
+
+  // Teclado lista (Enter para seleccionar)
+  searchResults.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      const target = e.target.closest('.color-name');
+      if(!target) return;
+      const idx = parseInt(target.dataset.index);
+      if(!isNaN(idx)) {
+        selectedIndex = idx;
+        updateDetails(selectedIndex);
+      }
+    }
+  });
+
+  // Buscar input
+  searchInput.addEventListener('input', () => {
+    renderList(searchInput.value.trim());
+  });
+
+  // Color Wheel selección (selección por clic y por teclado)
+  function getHueFromEvent(e) {
+    const rect = colorWheel.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    let x, y;
+
+    if(e.touches) {
+      x = e.touches[0].clientX;
+      y = e.touches[0].clientY;
+    } else {
+      x = e.clientX;
+      y = e.clientY;
+    }
+    const dx = x - cx;
+    const dy = y - cy;
+    let angle = Math.atan2(dy, dx);
+    if(angle < 0) angle += 2 * Math.PI;
+    return angle * 180 / Math.PI;
+  }
+
+  // Selección color más cercano por hue de rueda
+  function selectByHue(hue) {
+    // Convert hex to HSL
+    function hexToHSL(H) {
+      // Convert hex to RGB first
+      let r = 0, g = 0, b = 0;
+      if(H.length == 4){
+        r = "0x"+H[1]+H[1];
+        g = "0x"+H[2]+H[2];
+        b = "0x"+H[3]+H[3];
+      } else if(H.length == 7){
+        r = "0x"+H[1]+H[2];
+        g = "0x"+H[3]+H[4];
+        b = "0x"+H[5]+H[6];
+      }
+      r /= 255; g /= 255; b /= 255;
+      let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin;
+      let h = 0, s = 0, l = (cmax + cmin) / 2;
+      if(delta === 0) h = 0;
+      else if(cmax === r) h = ((g - b) / delta) % 6;
+      else if(cmax === g) h = (b - r) / delta + 2;
+      else h = (r - g) / delta + 4;
+      h = Math.round(h * 60);
+      if(h < 0) h += 360;
+      s = delta === 0 ? 0 : delta / (1 - Math.abs(2*l -1));
+      s = +(s * 100).toFixed(1);
+      l = +(l * 100).toFixed(1);
+      return {h,s,l};
+    }
+    // Buscar color más cercano al hue
+    let closestIndex = 0;
+    let minDiff = 360;
+    filamentos.forEach((fil,i) => {
+      const hsl = hexToHSL(fil.hex);
+      let diff = Math.abs(hsl.h - hue);
+      if(diff > 180) diff = 360 - diff;
+      if(diff < minDiff) {
+        minDiff = diff;
+        closestIndex = i;
+      }
+    });
+    selectedIndex = closestIndex;
+    updateDetails(selectedIndex);
+  }
+
+  colorWheel.addEventListener('click', e => {
+    const hue = getHueFromEvent(e);
+    selectByHue(hue);
+  });
+
+  colorWheel.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+      selectedIndex = selectedIndex === null ? 0 : (selectedIndex + 1) % filamentos.length;
+      updateDetails(selectedIndex);
+      e.preventDefault();
+    } else if(e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      selectedIndex = selectedIndex === null ? filamentos.length -1 : (selectedIndex -1 + filamentos.length) % filamentos.length;
+      updateDetails(selectedIndex);
       e.preventDefault();
     }
   });
 
-  // Obtener hue desde HEX (aproximado)
-  function getHueFromHex(hex) {
-    const rgb = hexToRgb(hex);
-    const r = rgb.r/255, g = rgb.g/255, b = rgb.b/255;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h=0;
-    if (max === min) h=0;
-    else if (max === r) h = 60 * ((g - b) / (max - min));
-    else if (max === g) h = 60 * (2 + (b - r) / (max - min));
-    else h = 60 * (4 + (r - g) / (max - min));
-    if (h < 0) h += 360;
-    return Math.round(h);
-  }
-
-  // Generador de ideas con colores stock
-  const ideasBase = [
-    "Imprime una figura geométrica con textura suave usando",
-    "Crea un llavero personalizado con acabado brillante en",
-    "Diseña un soporte para celular usando un filamento en color",
-    "Haz un organizador modular para escritorio en tono",
-    "Produce una carcasa para tus gadgets favorita en color",
-    "Construye una maqueta decorativa con filamento color",
-    "Prueba una pieza funcional con resistencia media en color",
-    "Elabora un adorno minimalista para tu hogar en color"
+  // Ideas random basado en stock (simplificado)
+  const ideas = [
+    "Prueba imprimir una figura con este filamento brillante.",
+    "Ideal para piezas decorativas gracias a su color vibrante.",
+    "Perfecto para prototipos que requieren alta resistencia.",
+    "Úsalo en proyectos que necesitan acabado mate y elegante.",
+    "Ideal para objetos que estarán expuestos a la luz solar.",
+    "Excelente para modelos con detalles finos y colorido intenso.",
+    "Ideal para piezas con resistencia al calor moderada.",
+    "Combínalo con filamentos transparentes para efecto especial."
   ];
 
-  function generateIdea() {
-    const fil = filamentos[Math.floor(Math.random() * filamentos.length)];
-    const idea = ideasBase[Math.floor(Math.random() * ideasBase.length)];
-    randomOutput.textContent = `${idea} "${fil.nombre}" (${fil.color.toUpperCase()})`;
-    updateSelectedColor(fil.color);
-  }
+  randomBtn.addEventListener('click', () => {
+    if(selectedIndex === null) {
+      randomOutput.textContent = "Selecciona primero un color para generar ideas.";
+      return;
+    }
+    // Escoger idea aleatoria
+    const idea = ideas[Math.floor(Math.random()*ideas.length)];
+    randomOutput.textContent = idea;
+  });
 
-  randomBtn.addEventListener('click', generateIdea);
-
-  // Mostrar listado completo al inicio
-  showClosestFilaments();
-
+  // Iniciar mostrando toda la lista y sin selección
+  renderList();
+  updateDetails(null);
+})();
 </script>
-
 </body>
 </html>
+
+
+
+
+
+
+
+
+
