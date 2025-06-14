@@ -330,3 +330,167 @@
   updateSelectedColor(selectedFilament.hex);
 
 </script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+
+<script>
+  // Variables para rueda color
+  const canvasWheel = document.getElementById('colorWheel');
+  const ctx = canvasWheel.getContext('2d');
+  const radius = canvasWheel.width / 2;
+  const center = { x: radius, y: radius };
+
+  let selectedHue = 0;
+  let isDragging = false;
+
+  // Función para dibujar rueda de colores
+  function drawColorWheel() {
+    const image = ctx.createImageData(canvasWheel.width, canvasWheel.height);
+    const data = image.data;
+
+    for (let y = 0; y < canvasWheel.height; y++) {
+      for (let x = 0; x < canvasWheel.width; x++) {
+        const dx = x - center.x;
+        const dy = y - center.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= radius) {
+          let hue = Math.atan2(dy, dx) * 180 / Math.PI;
+          if (hue < 0) hue += 360;
+
+          const saturation = dist / radius;
+          const value = 1;
+
+          const rgb = HSVtoRGB(hue, saturation, value);
+
+          const idx = (y * canvasWheel.width + x) * 4;
+          data[idx] = rgb.r;
+          data[idx + 1] = rgb.g;
+          data[idx + 2] = rgb.b;
+          data[idx + 3] = 255;
+        }
+      }
+    }
+    ctx.putImageData(image, 0, 0);
+
+    // Marca círculo selección
+    const angle = selectedHue * Math.PI / 180;
+    const sx = center.x + Math.cos(angle) * radius * 0.9;
+    const sy = center.y + Math.sin(angle) * radius * 0.9;
+    ctx.strokeStyle = '#3fb7a4';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(sx, sy, 12, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Conversión HSV a RGB
+  function HSVtoRGB(h, s, v) {
+    let c = v * s;
+    let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    let m = v - c;
+    let r, g, b;
+
+    if (h < 60) [r, g, b] = [c, x, 0];
+    else if (h < 120) [r, g, b] = [x, c, 0];
+    else if (h < 180) [r, g, b] = [0, c, x];
+    else if (h < 240) [r, g, b] = [0, x, c];
+    else if (h < 300) [r, g, b] = [x, 0, c];
+    else [r, g, b] = [c, 0, x];
+
+    return {
+      r: Math.round((r + m) * 255),
+      g: Math.round((g + m) * 255),
+      b: Math.round((b + m) * 255)
+    };
+  }
+
+  // Detecta clic y movimiento para seleccionar hue
+  canvasWheel.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    selectHue(e);
+  });
+  window.addEventListener('mouseup', () => isDragging = false);
+  canvasWheel.addEventListener('mousemove', (e) => {
+    if (isDragging) selectHue(e);
+  });
+
+  function selectHue(e) {
+    const rect = canvasWheel.getBoundingClientRect();
+    const x = e.clientX - rect.left - center.x;
+    const y = e.clientY - rect.top - center.y;
+    const dist = Math.sqrt(x * x + y * y);
+
+    if (dist <= radius) {
+      let hue = Math.atan2(y, x) * 180 / Math.PI;
+      if (hue < 0) hue += 360;
+      selectedHue = hue;
+      drawColorWheel();
+
+      // Actualizar color central con hue + saturation=1, value=1 para un color fuerte
+      const rgb = HSVtoRGB(selectedHue, 1, 1);
+      const hexColor = rgbToHex(rgb.r, rgb.g, rgb.b);
+      updateSelectedColor(hexColor);
+    }
+  }
+
+  function rgbToHex(r, g, b) {
+    return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+
+  drawColorWheel();
+
+  // THREE.js para cubo 3D rotatorio
+  const canvasCube = document.getElementById('cubePreview');
+  const renderer = new THREE.WebGLRenderer({ canvas: canvasCube, alpha: true, antialias: true });
+  renderer.setSize(canvasCube.width, canvasCube.height);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, canvasCube.width / canvasCube.height, 0.1, 100);
+  camera.position.z = 4;
+
+  const geometry = new THREE.BoxGeometry(2, 2, 2);
+  let material = new THREE.MeshStandardMaterial({ color: selectedFilament.hex, roughness: 0.4, metalness: 0.6 });
+  const cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  const light1 = new THREE.DirectionalLight('#3fb7a4', 0.8);
+  light1.position.set(5, 5, 5);
+  scene.add(light1);
+
+  const ambientLight = new THREE.AmbientLight('#3fb7a4', 0.3);
+  scene.add(ambientLight);
+
+  function draw3DPreview(color) {
+    cube.material.color.set(color);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    cube.rotation.x += 0.005;
+    cube.rotation.y += 0.008;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // Ideas random con base en colores en stock
+  const ideasBase = [
+    "Pieza funcional para unir módulos con color ",
+    "Soporte personalizado para tu escritorio en ",
+    "Accesorio decorativo para el hogar en color ",
+    "Protoboard compacto para electrónica en ",
+    "Base para plantas con textura silk en ",
+    "Carcasa para dispositivos en tono ",
+    "Llaveros personalizados con el tono ",
+    "Figuras artísticas con acabado brillante en "
+  ];
+
+  randomIdeaBtn.onclick = () => {
+    // Elige un color del stock al azar
+    const randomFilament = filaments[Math.floor(Math.random() * filaments.length)];
+    const randomIdea = ideasBase[Math.floor(Math.random() * ideasBase.length)];
+    ideaText.textContent = randomIdea + randomFilament.name + " (" + randomFilament.hex + ")";
+    updateSelectedColor(randomFilament.hex);
+  };
+
+</script>
+</body>
+</html>
