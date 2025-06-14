@@ -1,1 +1,99 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hoho3d - Buscador de Filamentos</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; background: #f5f5f5; }
+    h1 { color: #333; }
+    .color-picker {
+      display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;
+    }
+    .color-item {
+      cursor: pointer;
+      border: 2px solid transparent;
+      padding: 10px;
+      width: 120px;
+      background: white;
+      box-shadow: 0 0 5px #ccc;
+      text-align: center;
+      border-radius: 8px;
+      transition: border-color 0.3s;
+    }
+    .color-item:hover, .color-item.selected {
+      border-color: #007bff;
+    }
+    .color-swatch {
+      width: 50px; height: 50px; margin: 0 auto 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .product-link {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hoho3d - Buscador de Filamentos</h1>
+  <p>Elegí un color para ver los filamentos disponibles:</p>
+  <div class="color-picker" id="colorPicker"></div>
+
+  <script>
+    const products = [
+      {
+        name: "Grilon 3 PLA SILK Platino 1.75mm x 1kg",
+        colorHex: "#5b6770",
+        link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/silk/grilon-3-pla-silk-platino-175mm-x-1kg-5b6770"
+      },
+      {
+        name: "Grilon 3 PLA Piel 720 1.75mm x 1KG",
+        colorHex: "#e7b78a",
+        link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-piel-720-175mm-x-1kg-e7b78a"
+      },
+      {
+        name: "Grilon 3 PLA Gris Plata 1.75mm x 1kg",
+        colorHex: "#75787b",
+        link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-gris-plata-175mm-x-1kg-75787b"
+      }
+    ];
+
+    const picker = document.getElementById("colorPicker");
+
+    products.forEach((prod, idx) => {
+      const div = document.createElement("div");
+      div.className = "color-item";
+      div.title = prod.name;
+      div.style.borderColor = "transparent";
+
+      const swatch = document.createElement("div");
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = prod.colorHex;
+
+      const label = document.createElement("div");
+      label.textContent = prod.name;
+
+      const link = document.createElement("a");
+      link.href = prod.link;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.className = "product-link";
+      link.textContent = "Ver producto";
+
+      div.appendChild(swatch);
+      div.appendChild(label);
+      div.appendChild(link);
+
+      div.addEventListener("click", () => {
+        document.querySelectorAll(".color-item").forEach(el => el.classList.remove("selected"));
+        div.classList.add("selected");
+      });
+
+      picker.appendChild(div);
+    });
+  </script>
+</body>
+</html>
