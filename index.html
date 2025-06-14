@@ -3,391 +3,379 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hoho3D - Filamentos 3D</title>
+<title>Buscador Filamentos Hoho3d</title>
 <style>
-  /* Reset básico */
-  * {
+  /* Reset y base */
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a1e2d;
+    color: #c3e7f6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 1rem 2rem;
     box-sizing: border-box;
   }
-  body {
-    margin: 0; padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #0e1f2f;
-    color: #d4f1f9;
+  h1 {
+    text-align: center;
+    color: #4ad3e7;
+    text-shadow: 0 0 12px #2ca8d8cc;
+    margin-bottom: 0.5rem;
+  }
+  header p {
+    text-align: center;
+    color: #86d0fb;
+    font-style: italic;
+    margin-top: 0;
+    margin-bottom: 2rem;
+  }
+  main {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
   }
-  header {
-    font-size: 2.4rem;
-    font-weight: 700;
-    margin: 1.5rem 0 1rem 0;
-    letter-spacing: 2px;
-    color: #8de4f7;
-    text-shadow: 0 0 6px #35b7e0;
-  }
-  #container {
-    display: flex;
-    gap: 2.5rem;
-    max-width: 960px;
-    width: 95%;
-    background: #143544;
-    padding: 1.8rem 2rem;
-    border-radius: 18px;
-    box-shadow: 0 0 18px rgba(45, 157, 184, 0.6);
-  }
-  #filamentos-list {
-    flex: 1.2;
-    max-height: 420px;
-    overflow-y: auto;
-    background: #1f3647;
-    border-radius: 14px;
-    padding: 1rem 1.3rem;
-    box-shadow: inset 0 0 12px #54c0eb55;
-  }
-  .filamento-item {
-    background: #204055cc;
-    border-radius: 10px;
-    padding: 0.8rem 1rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.15s ease;
-    box-shadow: 0 0 8px #4ab1e6aa;
-  }
-  .filamento-item:hover {
-    background: #4ab1e633;
-    transform: scale(1.02);
-  }
-  .color-box {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    border: 2.5px solid #7de0fc;
-    box-shadow: 0 0 6px #54c0ebbb inset;
-    margin-left: 1rem;
-    flex-shrink: 0;
-  }
-  .filamento-info {
-    font-weight: 600;
-    font-size: 1rem;
-    color: #b6e3f9;
-    flex-grow: 1;
-    margin-left: 1rem;
-  }
+
+  /* Contenedor de rueda y lista */
   #color-picker-container {
-    flex: 0.9;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    width: 320px;
+    max-width: 100%;
   }
+
+  /* Rueda de color */
   #color-wheel {
-    width: 220px;
-    height: 220px;
+    width: 320px;
+    height: 320px;
     border-radius: 50%;
-    border: 5px solid #4ab1e6;
     background: conic-gradient(
-      red, yellow, lime, aqua, blue, magenta, red
+      #ff0000, #ff7f00, #ffff00, #7fff00, #00ff00, #00ff7f,
+      #00ffff, #007fff, #0000ff, #7f00ff, #ff00ff, #ff007f, #ff0000
     );
     cursor: pointer;
-    box-shadow: 0 0 15px #4ab1e6aa;
-    margin-bottom: 1.5rem;
-    position: relative;
+    box-shadow: 0 0 18px #22c7ffaa inset;
+    margin-bottom: 1rem;
     transition: box-shadow 0.3s ease;
   }
   #color-wheel:hover {
-    box-shadow: 0 0 30px #7de0fccc;
+    box-shadow: 0 0 32px #38eaffee inset;
   }
-  #selected-color-display {
-    width: 88px;
-    height: 88px;
-    border-radius: 50%;
-    border: 3px solid #54c0eb;
-    box-shadow: 0 0 25px #54c0ebcc;
-    background: #0e1f2f;
-    margin-bottom: 1.5rem;
-  }
-  #hex-input {
-    width: 130px;
-    padding: 0.45rem 0.8rem;
-    border-radius: 10px;
-    border: none;
-    background: #204055;
-    color: #a5d9ff;
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-align: center;
-    letter-spacing: 1.5px;
-    box-shadow: 0 0 8px #54c0ebbb inset;
-    margin-bottom: 1.5rem;
-    transition: background 0.3s ease;
-  }
-  #hex-input:focus {
-    background: #2a5a7d;
-    outline: none;
-    box-shadow: 0 0 14px #7de0fccc inset;
-  }
+
+  /* Contenedor listado filamentos */
   #search-results {
     width: 100%;
-    max-height: 140px;
+    max-height: 220px;
     overflow-y: auto;
-    background: #1b2f44;
-    border-radius: 12px;
-    padding: 0.8rem 1rem;
-    box-shadow: inset 0 0 12px #4ab1e6aa;
-    font-size: 0.9rem;
-    color: #9bd7fb;
-  }
-  #search-results a {
-    color: #80d1ff;
-    font-weight: 600;
-    text-decoration: none;
-    display: block;
-    margin: 0.2rem 0;
-    transition: color 0.2s ease;
-  }
-  #search-results a:hover {
-    color: #b0e6ff;
-    text-decoration: underline;
-  }
-  button {
-    padding: 0.9rem 1.8rem;
-    border-radius: 16px;
-    border: none;
-    background: linear-gradient(135deg, #348aa7, #54c0eb);
-    color: #0e1f2f;
-    font-weight: 700;
-    font-size: 1.2rem;
-    cursor: pointer;
-    box-shadow: 0 0 22px #54c0ebcc;
-    margin-top: 1.8rem;
-    transition: background 0.4s ease, color 0.4s ease;
-    align-self: center;
-    width: 100%;
-    max-width: 260px;
-  }
-  button:hover {
-    background: linear-gradient(135deg, #54c0eb, #348aa7);
-    color: #d4f1f9;
-    box-shadow: 0 0 28px #7de0fcff;
-  }
-  #suggestion-output {
-    margin-top: 1.2rem;
-    font-weight: 700;
-    color: #a1e8ff;
-    font-size: 1.1rem;
-    min-height: 56px;
-    text-align: center;
-    line-height: 1.3;
-    padding: 0 0.5rem;
-  }
-  footer {
-    margin-top: auto;
-    padding: 1.5rem 0;
-    font-size: 0.9rem;
-    color: #4ab1e6aa;
-    text-align: center;
-    letter-spacing: 1px;
-  }
-  /* Scrollbar */
-  #filamentos-list::-webkit-scrollbar,
-  #search-results::-webkit-scrollbar {
-    width: 7px;
-  }
-  #filamentos-list::-webkit-scrollbar-thumb,
-  #search-results::-webkit-scrollbar-thumb {
-    background: #54c0ebcc;
+    background: #113249;
     border-radius: 14px;
+    padding: 1rem 1.2rem;
+    box-shadow: inset 0 0 15px #4ad3e7cc;
+    font-size: 1rem;
+    color: #a3d9f7;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .color-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 6px 10px;
+    transition: background 0.25s ease;
+    user-select: none;
+  }
+  .color-name:hover, .color-name:focus {
+    background: #4ad3e733;
+    outline: none;
+  }
+  .color-box-small {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    border: 2px solid #7ce2ff;
+    box-shadow: 0 0 8px #4ad3e7cc inset;
+    flex-shrink: 0;
+  }
+
+  /* Info seleccionado */
+  #selected-info {
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #72d2ff;
+    user-select: none;
+    letter-spacing: 1.1px;
+  }
+  #selected-hex {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-top: 0.3rem;
+    color: #44c2ff;
+  }
+
+  /* Botón ideas */
+  #random-idea-btn {
+    margin: 2rem auto 0 auto;
+    padding: 0.9rem 2.2rem;
+    background: linear-gradient(90deg, #2aa9e0, #2fe3a9);
+    border: none;
+    border-radius: 24px;
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #00302e;
+    cursor: pointer;
+    box-shadow: 0 0 14px #2fe3a9aa;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  #random-idea-btn:hover {
+    background: linear-gradient(90deg, #22d0f2, #33f8b1);
+    box-shadow: 0 0 20px #2fe3a9ff;
+  }
+  #random-idea-output {
+    margin-top: 1rem;
+    text-align: center;
+    font-style: italic;
+    font-weight: 600;
+    color: #7becc5;
+    min-height: 50px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Responsive */
+  @media (max-width: 720px) {
+    main {
+      flex-direction: column;
+      align-items: center;
+    }
+    #color-picker-container {
+      width: 100%;
+      max-width: 480px;
+    }
+    #color-wheel {
+      width: 100%;
+      height: 280px;
+      margin-bottom: 1.2rem;
+    }
   }
 </style>
 </head>
 <body>
-<header>Hoho3D - Filamentos 3D</header>
-<div id="container">
-  <div id="filamentos-list" aria-label="Lista de filamentos disponibles" role="list">
-    <!-- Filamentos se insertan aquí con JS -->
-  </div>
-  <div id="color-picker-container" aria-label="Selector de color y sugerencias">
-    <div id="color-wheel" role="slider" aria-valuemin="0" aria-valuemax="360" aria-valuenow="0" tabindex="0" title="Mover para seleccionar color"></div>
-    <div id="selected-color-display" aria-live="polite" aria-atomic="true" aria-label="Color seleccionado"></div>
-    <input type="text" id="hex-input" maxlength="7" value="#000000" title="Ingrese código hex" aria-label="Código de color hexadecimal" />
-    <div id="search-results" aria-live="polite" aria-atomic="true" aria-label="Filamentos más cercanos al color seleccionado"></div>
-    <button id="suggestion-btn" aria-label="Generar idea de impresión 3D con color recomendado">Generar idea 3D + Color</button>
-    <div id="suggestion-output" aria-live="polite" aria-atomic="true"></div>
-  </div>
-</div>
-<footer>Hecho con ♥ para Hoho3D por ChatGPT</footer>
+
+<header>
+  <h1>Hoho3d Filamentos - Buscador Avanzado</h1>
+  <p>Tu mejor aliado para encontrar el filamento ideal según color</p>
+</header>
+
+<main>
+  <section id="color-picker-container" aria-label="Selector y listado de filamentos">
+    <div id="color-wheel" role="slider" aria-valuemin="0" aria-valuemax="360" tabindex="0" aria-label="Rueda de selección de color"></div>
+    <div id="selected-info" aria-live="polite">
+      Color seleccionado: <span id="selected-name">Ninguno</span><br/>
+      HEX: <span id="selected-hex">#------</span>
+    </div>
+    <div id="search-results" tabindex="0" aria-label="Lista de filamentos disponibles"></div>
+  </section>
+</main>
+
+<button id="random-idea-btn" aria-label="Generar idea aleatoria de impresión 3D con colores en stock">
+  💡 Sugerir idea de impresión 3D
+</button>
+<div id="random-idea-output" aria-live="polite"></div>
 
 <script>
-// Datos de filamentos
-const filamentos = [
-  {
-    nombre: "Grilon 3 PLA SILK Platino 1.75mm x 1kg",
-    color: "#5b6770",
-    link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/silk/grilon-3-pla-silk-platino-175mm-x-1kg-5b6770"
-  },
-  {
-    nombre: "Grilon 3 PLA Piel 720 1.75mm x 1KG",
-    color: "#e7b78a",
-     link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-piel-720-175mm-x-1kg-e7b78a"
-  },
-  {
-    nombre: "Grilon 3 PLA Gris Plata 1.75mm x 1kg",
-    color: "#75787b",
-    link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-gris-plata-175mm-x-1kg-75787b"
+  // Datos de filamentos
+  const filamentos = [
+    {
+      nombre: "Grilon 3 PLA SILK Platino 1.75mm x 1kg",
+      color: "#5b6770",
+      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/silk/grilon-3-pla-silk-platino-175mm-x-1kg-5b6770"
+    },
+    {
+      nombre: "Grilon 3 PLA Piel 720 1.75mm x 1KG",
+      color: "#e7b78a",
+      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-piel-720-175mm-x-1kg-e7b78a"
+    },
+    {
+      nombre: "Grilon 3 PLA Gris Plata 1.75mm x 1kg",
+      color: "#75787b",
+      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-gris-plata-175mm-x-1kg-75787b"
+    }
+  ];
+
+  // Selectores DOM
+  const colorWheel = document.getElementById('color-wheel');
+  const selectedName = document.getElementById('selected-name');
+  const selectedHex = document.getElementById('selected-hex');
+  const searchResults = document.getElementById('search-results');
+  const randomBtn = document.getElementById('random-idea-btn');
+  const randomOutput = document.getElementById('random-idea-output');
+
+  // Variables
+  let selectedColor = null;
+
+  // Convertir HEX a RGB
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    const bigint = parseInt(h, 16);
+    return {
+      r: (bigint >> 16) & 255,
+      g: (bigint >> 8) & 255,
+      b: bigint & 255
+    };
   }
-];
 
-// Ideas para impresión 3D
-const ideas3D = [
-  "Figuras decorativas minimalistas",
-  "Soportes para dispositivos móviles",
-  "Organizadores modulares para escritorio",
-  "Piezas personalizadas para drones",
-  "Accesorios para gaming",
-  "Mini macetas geométricas",
-  "Componentes para robótica educativa",
-  "Lámparas con diseño futurista",
-  "Modelos anatómicos para estudio",
-  "Carcasas para dispositivos wearables"
-];
+  // Distancia Euclidiana en RGB para color cercano
+  function colorDistance(c1, c2) {
+    return Math.sqrt(
+      Math.pow(c1.r - c2.r, 2) +
+      Math.pow(c1.g - c2.g, 2) +
+      Math.pow(c1.b - c2.b, 2)
+    );
+  }
 
-// Funciones auxiliares para colores
-function hexToRgb(hex) {
-  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-  return m ? [parseInt(m[1],16),parseInt(m[2],16),parseInt(m[3],16)] : null;
-}
-function colorDist(c1, c2) {
-  // distancia euclídea simple en RGB
-  const rgb1 = hexToRgb(c1);
-  const rgb2 = hexToRgb(c2);
-  if(!rgb1 || !rgb2) return 999999;
-  return Math.sqrt(
-    (rgb1[0]-rgb2[0])**2 +
-    (rgb1[1]-rgb2[1])**2 +
-    (rgb1[2]-rgb2[2])**2
-  );
-}
+  // Actualizar info seleccionada
+  function updateSelectedColor(color) {
+    selectedColor = color.toUpperCase();
+    const filamento = filamentos.find(f => f.color.toUpperCase() === selectedColor);
+    selectedName.textContent = filamento ? filamento.nombre : 'Color personalizado';
+    selectedHex.textContent = selectedColor;
+    colorWheel.style.boxShadow = `0 0 24px 6px ${selectedColor}aa inset`;
+  }
 
-// Renderizar lista de filamentos
-const listContainer = document.getElementById('filamentos-list');
-filamentos.forEach(fil => {
-  const div = document.createElement('div');
-  div.className = 'filamento-item';
-  div.title = fil.nombre;
-  div.setAttribute('role','listitem');
-  div.innerHTML = `
-    <div class="filamento-info">${fil.nombre}</div>
-    <div class="color-box" style="background:${fil.color}"></div>
-  `;
-  div.onclick = () => {
-    window.open(fil.link, "_blank");
-  };
-  listContainer.appendChild(div);
-});
+  // Mostrar todos los filamentos disponibles
+  function showClosestFilaments() {
+    searchResults.innerHTML = '';
+    filamentos.forEach(fil => {
+      const div = document.createElement('div');
+      div.className = 'color-name';
+      div.title = fil.nombre;
+      div.tabIndex = 0;
+      div.setAttribute('role', 'button');
+      div.innerHTML = `
+        <div class="color-box-small" style="background:${fil.color}"></div>
+        <div>${fil.nombre}</div>
+      `;
+      div.onclick = () => {
+        updateSelectedColor(fil.color);
+      };
+      div.onkeydown = e => {
+        if(e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          updateSelectedColor(fil.color);
+        }
+      };
+      searchResults.appendChild(div);
+    });
+  }
 
-// Convertir hue (0-360) a rgb
-function rgbFromHue(hue) {
-  let c = 1, x = 1 - Math.abs((hue / 60) % 2 - 1), m = 0;
-  let r=0,g=0,b=0;
-  if(hue < 60) {r=c;g=x;b=0;}
-  else if(hue < 120) {r=x;g=c;b=0;}
-  else if(hue < 180) {r=0;g=c;b=x;}
-  else if(hue < 240) {r=0;g=x;b=c;}
-  else if(hue < 300) {r=x;g=0;b=c;}
-  else {r=c;g=0;b=x;}
-  r = Math.round((r+m)*255);
-  g = Math.round((g+m)*255);
-  b = Math.round((b+m)*255);
-  return [r,g,b];
-}
+  // Manejar click o movimiento en la rueda para seleccionar color
+  function pickColorFromWheel(event) {
+    const rect = colorWheel.getBoundingClientRect();
+    const x = event.clientX - rect.left - rect.width/2;
+    const y = event.clientY - rect.top - rect.height/2;
+    const angle = Math.atan2(y, x);
+    const degrees = (angle * 180 / Math.PI + 360) % 360;
 
-function rgbToHex(rgb) {
-  return "#" + rgb.map(v => v.toString(16).padStart(2,'0')).join('');
-}
+    // Convertimos ángulo a color HEX
+    const h = degrees;
+    const s = 100;
+    const l = 50;
 
-// Actualiza el color seleccionado visual y texto
-const colorWheel = document.getElementById('color-wheel');
-const selectedColorDisplay = document.getElementById('selected-color-display');
-const hexInput = document.getElementById('hex-input');
-const searchResults = document.getElementById('search-results');
-const suggestionBtn = document.getElementById('suggestion-btn');
-const suggestionOutput = document.getElementById('suggestion-output');
+    const c = hslToHex(h, s, l);
+    updateSelectedColor(c);
+  }
 
-function updateSelectedColor(hex) {
-  selectedColorDisplay.style.backgroundColor = hex;
-  hexInput.value = hex.toUpperCase();
-  showClosestFilaments(hex);
-}
+  // Conversión HSL a HEX
+  function hslToHex(h, s, l) {
+    s /= 100;
+    l /= 100;
+    const c = (1 - Math.abs(2*l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c/2;
+    let r=0, g=0, b=0;
 
-function showClosestFilaments(hex) {
-  const sorted = filamentos.slice().sort((a,b) => colorDist(a.color, hex) - colorDist(b.color, hex));
-  searchResults.innerHTML = '';
-  sorted.slice(0,3).forEach(fil => {
-    const a = document.createElement('a');
-    a.href = fil.link;
-    a.target = '_blank';
-    a.textContent = fil.nombre;
-    searchResults.appendChild(a);
+    if (0 <= h && h < 60) {r=c; g=x; b=0;}
+    else if (60 <= h && h < 120) {r=x; g=c; b=0;}
+    else if (120 <= h && h < 180) {r=0; g=c; b=x;}
+    else if (180 <= h && h < 240) {r=0; g=x; b=c;}
+    else if (240 <= h && h < 300) {r=x; g=0; b=c;}
+    else if (300 <= h && h < 360) {r=c; g=0; b=x;}
+
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  // Evento para click en rueda
+  colorWheel.addEventListener('click', pickColorFromWheel);
+
+  // Evento para control con teclado (flechas)
+  colorWheel.addEventListener('keydown', e => {
+    if (!selectedColor) updateSelectedColor('#ff0000'); // si no hay color seleccionado inicializar rojo
+    let h = getHueFromHex(selectedColor);
+    if (e.key === 'ArrowRight') {
+      h = (h + 5) % 360;
+      updateSelectedColor(hslToHex(h, 100, 50));
+      e.preventDefault();
+    }
+    else if (e.key === 'ArrowLeft') {
+      h = (h + 355) % 360;
+      updateSelectedColor(hslToHex(h, 100, 50));
+      e.preventDefault();
+    }
   });
-}
 
-// Manejo interacción rueda de color
-colorWheel.addEventListener('click', e => {
-  const rect = colorWheel.getBoundingClientRect();
-  const x = e.clientX - rect.left - rect.width/2;
-  const y = e.clientY - rect.top - rect.height/2;
-  const angle = Math.atan2(y, x);
-  let deg = angle * 180 / Math.PI;
-  deg = (deg + 360) % 360;
-  const rgb = rgbFromHue(deg);
-  const hex = rgbToHex(rgb);
-  updateSelectedColor(hex);
-});
-
-// Input manual hex
-hexInput.addEventListener('input', e => {
-  let val = e.target.value.toUpperCase();
-  if(!val.startsWith('#')) val = '#' + val;
-  if(/^#[0-9A-F]{6}$/.test(val)) {
-    updateSelectedColor(val);
+  // Obtener hue desde HEX (aproximado)
+  function getHueFromHex(hex) {
+    const rgb = hexToRgb(hex);
+    const r = rgb.r/255, g = rgb.g/255, b = rgb.b/255;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h=0;
+    if (max === min) h=0;
+    else if (max === r) h = 60 * ((g - b) / (max - min));
+    else if (max === g) h = 60 * (2 + (b - r) / (max - min));
+    else h = 60 * (4 + (r - g) / (max - min));
+    if (h < 0) h += 360;
+    return Math.round(h);
   }
-});
 
-// Inicializar color negro
-updateSelectedColor('#000000');
+  // Generador de ideas con colores stock
+  const ideasBase = [
+    "Imprime una figura geométrica con textura suave usando",
+    "Crea un llavero personalizado con acabado brillante en",
+    "Diseña un soporte para celular usando un filamento en color",
+    "Haz un organizador modular para escritorio en tono",
+    "Produce una carcasa para tus gadgets favorita en color",
+    "Construye una maqueta decorativa con filamento color",
+    "Prueba una pieza funcional con resistencia media en color",
+    "Elabora un adorno minimalista para tu hogar en color"
+  ];
 
-// Botón genera idea + color de filamentos stock
-suggestionBtn.addEventListener('click', () => {
-  const idea = ideas3D[Math.floor(Math.random() * ideas3D.length)];
-  const fil = filamentos[Math.floor(Math.random() * filamentos.length)];
-  suggestionOutput.textContent = `Idea: ${idea} — Color sugerido: ${fil.nombre}`;
-  updateSelectedColor(fil.color);
-});
-
-// Mejorar accesibilidad con teclado para rueda (opcional)
-colorWheel.addEventListener('keydown', e => {
-  if(e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-    e.preventDefault();
-    adjustHue(-5);
-  } else if(e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-    e.preventDefault();
-    adjustHue(5);
+  function generateIdea() {
+    const fil = filamentos[Math.floor(Math.random() * filamentos.length)];
+    const idea = ideasBase[Math.floor(Math.random() * ideasBase.length)];
+    randomOutput.textContent = `${idea} "${fil.nombre}" (${fil.color.toUpperCase()})`;
+    updateSelectedColor(fil.color);
   }
-});
 
-let currentHue = 0;
-function adjustHue(delta) {
-  currentHue = (currentHue + delta + 360) % 360;
-  const rgb = rgbFromHue(currentHue);
-  const hex = rgbToHex(rgb);
-  updateSelectedColor(hex);
-  // actualizar atributo aria-valuenow
-  colorWheel.setAttribute('aria-valuenow', currentHue);
-}
+  randomBtn.addEventListener('click', generateIdea);
+
+  // Mostrar listado completo al inicio
+  showClosestFilaments();
+
 </script>
+
 </body>
 </html>
