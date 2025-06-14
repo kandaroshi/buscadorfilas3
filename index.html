@@ -1,356 +1,167 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Buscador Hoho3D - Filamentos 3D</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoho 3D - Filamentos</title>
+  <!-- Three.js for 3D Cube -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- TinyColor for color manipulations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
   <style>
-    /* Reset & Base */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    /* Degradado azul claro a oscuro */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      /* Degradado azul claro → azul oscuro */
-      background: linear-gradient(135deg, #B3E5FC 0%, #01579B 100%);
-      color: #0A3E36;
+      background: linear-gradient(135deg, #AEDFF7 0%, #0C2D48 100%);
+      font-family: sans-serif;
       display: flex;
-      height: 100vh;
-      overflow: hidden;
+      color: white;
     }
-    a { color: inherit; text-decoration: none; }
-    /* Layout general */
-    #app {
-      display: flex; flex: 1; padding: 20px; gap: 20px;
+    /* Sidebar */
+    #sidebar {
+      width: 300px;
+      padding: 20px;
+      box-sizing: border-box;
+      background: rgba(0,0,0,0.3);
     }
-    section {
-      background: white; border-radius: 8px;
-      padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      display: flex; flex-direction: column;
+    #sidebar input[type="text"] {
+      width: 100%; padding: 10px; margin-bottom: 10px;
+      border: none; border-radius: 4px;
     }
-
-    /* IZQUIERDA: Stock */
-    #stock {
-      flex: 0 0 280px;
+    #filament-list { list-style: none; padding: 0; max-height: 60vh; overflow-y: auto; }
+    #filament-list li { padding: 6px; margin-bottom: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; cursor: pointer; }
+    /* Main area */
+    #main {
+      flex: 1; position: relative;
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 20px;
     }
-    #stock h2 {
-      margin-bottom: 12px; color: #00796B;
+    /* Hex wheel placeholder */
+    #color-wheel { width: 300px; height: 300px; border-radius: 50%; background: conic-gradient(
+      red, yellow, lime, aqua, blue, magenta, red);
+      cursor: crosshair; }
+    #similar-colors { width: 200px; list-style: none; padding: 0; }
+    #similar-colors li { height: 30px; margin-bottom: 6px; border-radius: 4px; }
+    #generate-btn {
+      position: absolute; bottom: 20px;
+      padding: 10px 20px; font-size: 16px;
+      border: none; border-radius: 4px; cursor: pointer;
+      background: rgba(255,255,255,0.2); color: white;
     }
-    #search input {
-      width: 100%; padding: 8px; font-size: 1rem;
-      border: 1px solid #B2DFDB; border-radius: 4px;
-      outline: none; margin-bottom: 12px;
-    }
-    #stock-list {
-      flex: 1; overflow-y: auto;
-      display: flex; flex-direction: column; gap: 8px;
-      padding-right: 6px;
-    }
-    .stock-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px; border: 1px solid #B2DFDB;
-      border-radius: 4px; transition: background .2s;
-    }
-    .stock-item:hover {
-      background: #B2DFDB;
-    }
-    .swatch {
-      width: 24px; height: 24px; border: 1px solid #004D40;
-      border-radius: 4px; flex-shrink: 0;
-    }
-    .info .name {
-      font-weight: 600;
-    }
-    .info .hex {
-      font-family: monospace; color: #004D40; font-size: .9rem;
-    }
-    .info .link {
-      font-size: .8rem; color: #00796B; margin-top: 4px;
-    }
-
-    /* CENTRO: Rueda + preview + cubo + sugerencias */
-    #center {
-      flex: 1; align-items: center; overflow: hidden;
-    }
-    #center h2 {
-      color: #00796B; margin-bottom: 12px;
-    }
-    #wheel-container {
-      position: relative;
-    }
-    canvas#wheel {
-      width: 280px; height: 280px; border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0,77,64,0.4); cursor: crosshair;
-    }
-    #selected {
-      display: flex; align-items: center; gap: 12px;
-      margin-top: 12px; font-size: 1.1rem;
-    }
-    #preview {
-      width: 48px; height: 48px; border: 2px solid #004D40;
-      border-radius: 4px;
-    }
-    #selected-hex {
-      font-family: monospace;
-    }
-    #cube {
-      width: 120px; height: 120px; margin-top: 16px;
-      transform-style: preserve-3d;
-      animation: spin 8s linear infinite;
-    }
-    #cube div {
-      position: absolute; width: 120px; height: 120px;
-      border: 2px solid #004D40;
-      background: inherit;
-    }
-    #cube .front  { transform: translateZ(60px); }
-    #cube .back   { transform: rotateY(180deg) translateZ(60px); }
-    #cube .right  { transform: rotateY(90deg) translateZ(60px); }
-    #cube .left   { transform: rotateY(-90deg) translateZ(60px); }
-    #cube .top    { transform: rotateX(90deg) translateZ(60px); }
-    #cube .bottom { transform: rotateX(-90deg) translateZ(60px); }
-    @keyframes spin {
-      to { transform: rotateX(360deg) rotateY(360deg); }
-    }
-    #suggest {
-      margin-top: 20px; text-align: center;
-    }
-    #suggest button {
-      padding: 8px 16px; background: #00796B;
-      color: white; border-radius: 4px;
-    }
-    #suggest-text {
-      margin-top: 8px; font-style: italic;
-      display: flex; align-items: center; justify-content: center;
-      gap: 8px; color: #004D40;
-    }
-    .suggestion-color-box {
-      width: 24px; height: 24px; border: 1.2px solid #00796B;
-      border-radius: 4px;
-    }
-
-    /* DERECHA: Cercanos */
-    #nearest {
-      flex: 0 0 280px; overflow-y: auto;
-      padding-right: 6px;
-    }
-    #nearest h2 {
-      color: #00796B; margin-bottom: 12px;
-      text-align: center;
-    }
-    .near-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px; border: 1px solid #B2DFDB;
-      border-radius: 4px; transition: background .2s;
-    }
-    .near-item:hover {
-      background: #B2DFDB;
-    }
-    .near-item .swatch {
-      width: 24px; height: 24px; border: 1px solid #004D40;
-      border-radius: 4px; flex-shrink: 0;
-    }
-
-    /* Scrollbar */
-    #stock-list::-webkit-scrollbar,
-    #nearest::-webkit-scrollbar {
-      width: 6px;
-    }
-    #stock-list::-webkit-scrollbar-thumb,
-    #nearest::-webkit-scrollbar-thumb {
-      background: #004D40;
-      border-radius: 3px;
-    }
+    /* Canvas for Three.js */
+    #cube-canvas { width: 400px; height: 400px; }
   </style>
 </head>
 <body>
-  <div id="app">
-    <!-- IZQUIERDA -->
-    <section id="stock">
-      <h2>Filamentos de nuestra web (consultar stock)</h2>
-      <div id="search"><input type="text" id="search-input" placeholder="Buscar por nombre o hex…" /></div>
-      <div id="stock-list"></div>
-    </section>
-
-    <!-- CENTRO -->
-    <section id="center">
-      <h2>Selector de Color</h2>
-      <div id="wheel-container">
-        <canvas id="wheel" width="280" height="280"></canvas>
-      </div>
-      <div id="selected">
-        <div id="preview"></div>
-        <div id="selected-hex">#5de1df</div>
-      </div>
-      <div id="cube">
-        <div class="front"></div>
-        <div class="back"></div>
-        <div class="right"></div>
-        <div class="left"></div>
-        <div class="top"></div>
-        <div class="bottom"></div>
-      </div>
-      <div id="suggest">
-        <button id="suggest-btn">Generar idea 3D</button>
-        <div id="suggest-text"></div>
-      </div>
-    </section>
-
-    <!-- DERECHA -->
-    <section id="nearest">
-      <h2>5 Filamentos más Cercanos</h2>
-    </section>
+  <div id="sidebar">
+    <h2>Hoho 3D Filamentos</h2>
+    <input id="search" type="text" placeholder="Buscar por nombre o hex..." />
+    <ul id="filament-list">
+      <!-- Items dinámicos -->
+    </ul>
+  </div>
+  <div id="main">
+    <div>
+      <div id="color-wheel"></div>
+      <ul id="similar-colors"></ul>
+    </div>
+    <canvas id="cube-canvas"></canvas>
+    <button id="generate-btn">Generar Ideas</button>
   </div>
 
   <script>
-    // Datos stock
-    const stock = [
-      {name:"Grilon 3 PLA SILK Platino 1.75mm x 1kg",hex:"#5b6770",link:"https://www.hoho3d.com.ar/...5b6770"},
-      {name:"Grilon 3 PLA Piel 720 1.75mm x 1kg",hex:"#e7b78a",link:"https://www.hoho3d.com.ar/...e7b78a"},
-      {name:"Grilon 3 PLA Gris Plata 1.75mm x 1kg",hex:"#75787b",link:"https://www.hoho3d.com.ar/...75787b"},
-      {name:"Grilon 3 PLA Cobre 1.75mm x 1kg",hex:"#a1561c",link:"https://www.hoho3d.com.ar/...a1561c"},
-      {name:"Grilon 3 PLA Bronce 1.75mm x 1kg",hex:"#998542",link:"https://www.hoho3d.com.ar/...998542"}
-    ];
-    const ideas = [
-      "Soporte para celular ergonómico",
-      "Maceta geométrica para escritorio",
-      "Llaveros personalizados",
-      "Mini figura decorativa",
-      "Porta auriculares flexible"
+    // Datos iniciales de filamentos y de ideas
+    const filamentos = [
+      { name: 'Grilon 3 PLA SILK Platino 1.75mm x 1kg', hex: '#5b6770', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/silk/grilon-3-pla-silk-platino-175mm-x-1kg-5b6770', ideas: [] },
+      { name: 'Grilon 3 PLA Piel 720 1.75mm x 1KG',      hex: '#e7b78a', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-piel-720-175mm-x-1kg-e7b78a', ideas: [] },
+      { name: 'Grilon 3 PLA Gris Plata 1.75mm x 1kg',     hex: '#75787b', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-gris-plata-175mm-x-1kg-75787b', ideas: [] },
+      { name: 'Grilon 3 PLA Cobre 1.75mm x 1kg',         hex: '#a1561c', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-cobre-175mm-x-1kg-a1561c', ideas: [] },
+      { name: 'Grilon 3 PLA Bronce 1.75mm x 1kg',        hex: '#998542', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-bronce-175mm-x-1kg-998542', ideas: [] }
     ];
 
-    // DOM refs
-    const listEl = document.getElementById('stock-list');
-    const searchEl = document.getElementById('search-input');
-    const wheel = document.getElementById('wheel');
-    const ctx = wheel.getContext('2d');
-    const preview = document.getElementById('preview');
-    const selHexEl = document.getElementById('selected-hex');
-    const cube = document.getElementById('cube');
-    const suggestBtn = document.getElementById('suggest-btn');
-    const suggestText = document.getElementById('suggest-text');
-    const nearestEl = document.getElementById('nearest');
-    const R = wheel.width/2;
-
-    let selectedHex = "#5de1df";
-
-    // Render stock
-    function renderStock(arr) {
+    // Renderiza lista según filtro
+    const listEl = document.getElementById('filament-list');
+    const searchInput = document.getElementById('search');
+    function renderList(filter = '') {
       listEl.innerHTML = '';
-      arr.forEach(f => {
-        const a = document.createElement('a');
-        a.className = 'stock-item';
-        a.href = f.link; a.target = '_blank';
-        a.innerHTML = `
-          <div class="swatch" style="background:${f.hex}"></div>
-          <div class="info">
-            <div class="name">${f.name}</div>
-            <div class="hex">${f.hex}</div>
-            <div class="link">${f.link}</div>
-          </div>`;
-        listEl.appendChild(a);
+      filamentos.filter(f => f.name.toLowerCase().includes(filter)
+        || f.hex.toLowerCase().includes(filter))
+        .forEach(f => {
+          const li = document.createElement('li');
+          li.textContent = `${f.name} (${f.hex})`;
+          li.onclick = () => selectColor(f.hex);
+          listEl.appendChild(li);
+        });
+    }
+    searchInput.addEventListener('input', e => renderList(e.target.value.toLowerCase()));
+    renderList();
+
+    // Selección de color y similares
+    const wheel = document.getElementById('color-wheel');
+    const similarList = document.getElementById('similar-colors');
+    function selectColor(hex) {
+      updateCubeColor(hex);
+      displaySimilar(hex);
+      const filament = filamentos.find(f => f.hex.toLowerCase() === hex.toLowerCase());
+      if (filament) window.open(filament.link, '_blank');
+    }
+    function displaySimilar(baseHex) {
+      similarList.innerHTML = '';
+      const base = tinycolor(baseHex);
+      const sorted = filamentos
+        .map(f => ({ ...f, diff: base.diff(f.hex) }))
+        .sort((a,b) => a.diff - b.diff)
+        .slice(1,6);
+      sorted.forEach(f => {
+        const li = document.createElement('li');
+        li.textContent = f.hex;
+        li.style.background = f.hex;
+        li.onclick = () => selectColor(f.hex);
+        similarList.appendChild(li);
       });
     }
-    searchEl.addEventListener('input', () => {
-      const q = searchEl.value.toLowerCase();
-      renderStock(stock.filter(f =>
-        f.name.toLowerCase().includes(q) || f.hex.includes(q)
-      ));
-    });
-
-    // Draw color wheel
-    function drawWheel() {
-      const img = ctx.createImageData(280,280), d = img.data;
-      for (let y=0; y<280; y++) {
-        for (let x=0; x<280; x++) {
-          const dx = x-R, dy = y-R, dist = Math.hypot(dx,dy);
-          const idx = (y*280 + x)*4;
-          if (dist>R) { d[idx+3]=0; continue; }
-          let ang = Math.atan2(dy,dx); if (ang<0) ang+=2*Math.PI;
-          const h = ang*180/Math.PI, s = dist/R, v =1;
-          const [r,g,b] = hsvToRgb(h,s,v);
-          d[idx]=r; d[idx+1]=g; d[idx+2]=b; d[idx+3]=255;
-        }
-      }
-      ctx.putImageData(img,0,0);
-    }
-    function hsvToRgb(h,s,v){
-      h/=60; const c=v*s, x=c*(1-Math.abs(h%2-1)), m=v-c;
-      let [r1,g1,b1]=[0,0,0];
-      if(h<1) [r1,g1]=[c,x];
-      else if(h<2) [r1,g1]=[x,c];
-      else if(h<3) [g1,b1]=[c,x];
-      else if(h<4) [g1,b1]=[x,c];
-      else if(h<5) [r1,b1]=[x,c];
-      else [r1,b1]=[c,x];
-      return [Math.round((r1+m)*255),Math.round((g1+m)*255),Math.round((b1+m)*255)];
-    }
-    function rgbToHex(r,g,b){
-      return "#"+[r,g,b].map(n=>n.toString(16).padStart(2,'0')).join('');
-    }
-    wheel.addEventListener('click', e=>{
-      const rect=wheel.getBoundingClientRect();
-      const x=e.clientX-rect.left, y=e.clientY-rect.top;
-      const dx=x-R, dy=y-R, dist=Math.hypot(dx,dy);
-      if(dist>R) return;
-      let ang=Math.atan2(dy,dx); if(ang<0) ang+=2*Math.PI;
-      const h=ang*180/Math.PI, s=dist/R, v=1;
-      const hex=rgbToHex(...hsvToRgb(h,s,v));
+    wheel.addEventListener('click', e => {
+      const rect = wheel.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = rect.width;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(wheel, 0, 0);
+      const data = ctx.getImageData(x,y,1,1).data;
+      const hex = tinycolor({ r:data[0], g:data[1], b:data[2] }).toHexString();
       selectColor(hex);
     });
 
-    // Select color: update preview, cube, nearest
-    function selectColor(hex) {
-      selectedHex=hex;
-      preview.style.background=hex;
-      selHexEl.textContent=hex;
-      cube.style.background=hex;
-      cube.querySelectorAll('div').forEach(face=>face.style.background=hex);
-      renderNearest();
-    }
-    function getClosest(arr, hex) {
-      const target = hexToRgbArr(hex);
-      return arr.slice().sort((a,b)=>
-        colorDist(hexToRgbArr(a.hex),target)
-        - colorDist(hexToRgbArr(b.hex),target)
-      ).slice(0,5);
-    }
-    function hexToRgbArr(h){
-      return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
-    }
-    function colorDist(a,b){ return Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]); }
-    function renderNearest() {
-      nearestEl.innerHTML = '<h2>5 Filamentos más Cercanos</h2>';
-      const list = getClosest(stock, selectedHex);
-      list.forEach(f=>{
-        const a = document.createElement('a');
-        a.className='near-item';
-        a.href=f.link; a.target='_blank';
-        // coloriza el item
-        a.style.borderColor = f.hex;
-        a.style.backgroundColor = hexToRgba(f.hex,0.1);
-        a.innerHTML = `
-          <div class="swatch" style="background:${f.hex}"></div>
-          <div>
-            <div class="name">${f.name}</div>
-            <div class="hex">${f.hex}</div>
-          </div>`;
-        nearestEl.appendChild(a);
-      });
-    }
-    function hexToRgba(h,a){
-      const [r,g,b]=hexToRgbArr(h);
-      return `rgba(${r},${g},${b},${a})`;
-    }
+    // Generar ideas y color random
+    const genBtn = document.getElementById('generate-btn');
+    genBtn.onclick = () => {
+      const rand = filamentos[Math.floor(Math.random()*filamentos.length)];
+      selectColor(rand.hex);
+      if (rand.ideas.length) alert(`Idea: ${rand.ideas[Math.floor(Math.random()*rand.ideas.length)]}`);
+    };
 
-    // Suggestions
-    suggestBtn.addEventListener('click', ()=>{
-      const idea = ideas[Math.floor(Math.random()*ideas.length)];
-      suggestText.innerHTML = `${idea} <span class="suggestion-color-box" style="background:${selectedHex}"></span>${selectedHex}`;
-    });
-
-    // Init
-    drawWheel();
-    renderStock(stock);
-    selectColor("#5de1df");
+    // Three.js configuración para cube
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cube-canvas'), alpha: true });
+    renderer.setSize(400,400);
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    camera.position.z = 3;
+    function animate() {
+      requestAnimationFrame(animate);
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    }
+    animate();
+    function updateCubeColor(hex) {
+      material.color.set(hex);
+    }
   </script>
 </body>
 </html>
+
