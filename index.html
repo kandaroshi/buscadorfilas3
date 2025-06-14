@@ -1,167 +1,311 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hoho 3D - Filamentos</title>
-  <!-- Three.js for 3D Cube -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <!-- TinyColor for color manipulations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tinycolor/1.4.2/tinycolor.min.js"></script>
-  <style>
-    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-    /* Degradado azul claro a oscuro */
-    body {
-      background: linear-gradient(135deg, #AEDFF7 0%, #0C2D48 100%);
-      font-family: sans-serif;
-      display: flex;
-      color: white;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Buscador de Filamentos Hoho3d</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 20px;
+    background: #f0f0f0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  h1 {
+    width: 100%;
+    text-align: center;
+    color: #333;
+  }
+  .container {
+    display: flex;
+    max-width: 900px;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  .left-panel, .right-panel {
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  .left-panel {
+    flex: 1 1 50%;
+    border-right: 1px solid #ddd;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+  .right-panel {
+    flex: 1 1 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .product {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding: 8px 0;
+  }
+  .color-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    margin-right: 15px;
+    border: 1px solid #aaa;
+  }
+  .product-info {
+    flex-grow: 1;
+  }
+  .product-info a {
+    color: #0073e6;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .product-info a:hover {
+    text-decoration: underline;
+  }
+  .hex-code {
+    font-family: monospace;
+    color: #666;
+  }
+  /* Estilos rueda de color */
+  #colorPicker {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid #333;
+    margin-bottom: 15px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+  }
+  #colorPicker::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+  #colorPicker::-webkit-color-swatch {
+    border-radius: 50%;
+  }
+  #selectedColor {
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    border: 3px solid #333;
+    margin-bottom: 20px;
+  }
+  #results {
+    width: 100%;
+  }
+  #results .product {
+    border-bottom: 1px solid #ddd;
+  }
+  #noResults {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 10px;
+  }
+  /* Responsive */
+  @media (max-width: 700px) {
+    .container {
+      flex-direction: column;
     }
-    /* Sidebar */
-    #sidebar {
-      width: 300px;
-      padding: 20px;
-      box-sizing: border-box;
-      background: rgba(0,0,0,0.3);
+    .left-panel, .right-panel {
+      max-height: none;
+      border-right: none;
+      border-bottom: 1px solid #ddd;
     }
-    #sidebar input[type="text"] {
-      width: 100%; padding: 10px; margin-bottom: 10px;
-      border: none; border-radius: 4px;
+    .right-panel {
+      align-items: center;
+      padding-top: 10px;
     }
-    #filament-list { list-style: none; padding: 0; max-height: 60vh; overflow-y: auto; }
-    #filament-list li { padding: 6px; margin-bottom: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; cursor: pointer; }
-    /* Main area */
-    #main {
-      flex: 1; position: relative;
-      display: flex; align-items: center; justify-content: space-around;
-      padding: 20px;
-    }
-    /* Hex wheel placeholder */
-    #color-wheel { width: 300px; height: 300px; border-radius: 50%; background: conic-gradient(
-      red, yellow, lime, aqua, blue, magenta, red);
-      cursor: crosshair; }
-    #similar-colors { width: 200px; list-style: none; padding: 0; }
-    #similar-colors li { height: 30px; margin-bottom: 6px; border-radius: 4px; }
-    #generate-btn {
-      position: absolute; bottom: 20px;
-      padding: 10px 20px; font-size: 16px;
-      border: none; border-radius: 4px; cursor: pointer;
-      background: rgba(255,255,255,0.2); color: white;
-    }
-    /* Canvas for Three.js */
-    #cube-canvas { width: 400px; height: 400px; }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div id="sidebar">
-    <h2>Hoho 3D Filamentos</h2>
-    <input id="search" type="text" placeholder="Buscar por nombre o hex..." />
-    <ul id="filament-list">
-      <!-- Items dinámicos -->
-    </ul>
-  </div>
-  <div id="main">
-    <div>
-      <div id="color-wheel"></div>
-      <ul id="similar-colors"></ul>
-    </div>
-    <canvas id="cube-canvas"></canvas>
-    <button id="generate-btn">Generar Ideas</button>
+
+<h1>Buscador de Filamentos Hoho3d</h1>
+<p style="width:100%; text-align:center; font-style: italic; color:#555; margin-bottom: 25px;">
+  Tu elección precisa para impresión 3D
+</p>
+
+<div class="container">
+  <div class="left-panel">
+    <h2>Filamentos disponibles</h2>
+    <div id="productList"></div>
   </div>
 
-  <script>
-    // Datos iniciales de filamentos y de ideas
-    const filamentos = [
-      { name: 'Grilon 3 PLA SILK Platino 1.75mm x 1kg', hex: '#5b6770', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/silk/grilon-3-pla-silk-platino-175mm-x-1kg-5b6770', ideas: [] },
-      { name: 'Grilon 3 PLA Piel 720 1.75mm x 1KG',      hex: '#e7b78a', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-piel-720-175mm-x-1kg-e7b78a', ideas: [] },
-      { name: 'Grilon 3 PLA Gris Plata 1.75mm x 1kg',     hex: '#75787b', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-gris-plata-175mm-x-1kg-75787b', ideas: [] },
-      { name: 'Grilon 3 PLA Cobre 1.75mm x 1kg',         hex: '#a1561c', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-cobre-175mm-x-1kg-a1561c', ideas: [] },
-      { name: 'Grilon 3 PLA Bronce 1.75mm x 1kg',        hex: '#998542', link: 'https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-bronce-175mm-x-1kg-998542', ideas: [] }
-    ];
+  <div class="right-panel">
+    <h2>Selecciona un color</h2>
+    <input type="color" id="colorPicker" value="#5b6770" />
+    <div id="selectedColor"></div>
+    <h3>Filamentos cercanos</h3>
+    <div id="results"></div>
+  </div>
+</div>
 
-    // Renderiza lista según filtro
-    const listEl = document.getElementById('filament-list');
-    const searchInput = document.getElementById('search');
-    function renderList(filter = '') {
-      listEl.innerHTML = '';
-      filamentos.filter(f => f.name.toLowerCase().includes(filter)
-        || f.hex.toLowerCase().includes(filter))
-        .forEach(f => {
-          const li = document.createElement('li');
-          li.textContent = `${f.name} (${f.hex})`;
-          li.onclick = () => selectColor(f.hex);
-          listEl.appendChild(li);
-        });
+<script>
+  const filamentos = [
+    {
+      nombre: "Grilon 3 PLA SILK Platino 1.75mm x 1kg",
+      hex: "#5b6770",
+      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/silk/grilon-3-pla-silk-platino-175mm-x-1kg-5b6770"
+    },
+    {
+      nombre: "Grilon 3 PLA Piel 720 1.75mm x 1KG",
+      hex: "#e7b78a",
+      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-piel-720-175mm-x-1kg-e7b78a"
+    },
+    {
+      nombre: "Grilon 3 PLA Gris Plata 1.75mm x 1kg",
+      hex: "#75787b",
+      link: "https://www.hoho3d.com.ar/impresion-3d/filamentos/grilon-3/basicos/grilon-3-pla-gris-plata-175mm-x-1kg-75787b"
     }
-    searchInput.addEventListener('input', e => renderList(e.target.value.toLowerCase()));
-    renderList();
+  ];
 
-    // Selección de color y similares
-    const wheel = document.getElementById('color-wheel');
-    const similarList = document.getElementById('similar-colors');
-    function selectColor(hex) {
-      updateCubeColor(hex);
-      displaySimilar(hex);
-      const filament = filamentos.find(f => f.hex.toLowerCase() === hex.toLowerCase());
-      if (filament) window.open(filament.link, '_blank');
-    }
-    function displaySimilar(baseHex) {
-      similarList.innerHTML = '';
-      const base = tinycolor(baseHex);
-      const sorted = filamentos
-        .map(f => ({ ...f, diff: base.diff(f.hex) }))
-        .sort((a,b) => a.diff - b.diff)
-        .slice(1,6);
-      sorted.forEach(f => {
-        const li = document.createElement('li');
-        li.textContent = f.hex;
-        li.style.background = f.hex;
-        li.onclick = () => selectColor(f.hex);
-        similarList.appendChild(li);
-      });
-    }
-    wheel.addEventListener('click', e => {
-      const rect = wheel.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = rect.width;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(wheel, 0, 0);
-      const data = ctx.getImageData(x,y,1,1).data;
-      const hex = tinycolor({ r:data[0], g:data[1], b:data[2] }).toHexString();
-      selectColor(hex);
+  // Mostrar filamentos fijos a la izquierda
+  function mostrarFilamentos() {
+    const productList = document.getElementById('productList');
+    productList.innerHTML = '';
+    filamentos.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'product';
+
+      const colorBox = document.createElement('div');
+      colorBox.className = 'color-box';
+      colorBox.style.backgroundColor = f.hex;
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'product-info';
+
+      const link = document.createElement('a');
+      link.href = f.link;
+      link.target = "_blank";
+      link.textContent = f.nombre;
+
+      const hexSpan = document.createElement('div');
+      hexSpan.className = 'hex-code';
+      hexSpan.textContent = f.hex;
+
+      infoDiv.appendChild(link);
+      infoDiv.appendChild(hexSpan);
+
+      div.appendChild(colorBox);
+      div.appendChild(infoDiv);
+
+      productList.appendChild(div);
     });
+  }
 
-    // Generar ideas y color random
-    const genBtn = document.getElementById('generate-btn');
-    genBtn.onclick = () => {
-      const rand = filamentos[Math.floor(Math.random()*filamentos.length)];
-      selectColor(rand.hex);
-      if (rand.ideas.length) alert(`Idea: ${rand.ideas[Math.floor(Math.random()*rand.ideas.length)]}`);
+  // Convierte HEX a RGB
+  function hexToRgb(hex) {
+    if(!hex || hex[0] !== '#' || hex.length !== 7) return null;
+    return {
+      r: parseInt(hex.substr(1,2),16),
+      g: parseInt(hex.substr(3,2),16),
+      b: parseInt(hex.substr(5,2),16)
     };
+  }
 
-    // Three.js configuración para cube
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cube-canvas'), alpha: true });
-    renderer.setSize(400,400);
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    camera.position.z = 3;
-    function animate() {
-      requestAnimationFrame(animate);
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
-      renderer.render(scene, camera);
+  // Calcula distancia euclidiana en RGB
+  function colorDistance(c1, c2) {
+    return Math.sqrt(
+      Math.pow(c1.r - c2.r, 2) +
+      Math.pow(c1.g - c2.g, 2) +
+      Math.pow(c1.b - c2.b, 2)
+    );
+  }
+
+  // Buscar y mostrar filamentos cercanos
+  function buscarFilamentos(hex) {
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '';
+
+    const inputRgb = hexToRgb(hex);
+    if (!inputRgb) {
+      resultsDiv.innerHTML = '<p id="noResults">Color inválido.</p>';
+      return;
     }
-    animate();
-    function updateCubeColor(hex) {
-      material.color.set(hex);
+
+    const conDistancia = filamentos.map(f => ({
+      ...f,
+      distancia: colorDistance(inputRgb, hexToRgb(f.hex))
+    }));
+
+    conDistancia.sort((a,b) => a.distancia - b.distancia);
+
+    const top3 = conDistancia.slice(0,3);
+
+    if(top3.length === 0){
+      resultsDiv.innerHTML = '<p id="noResults">No se encontraron filamentos cercanos.</p>';
+      return;
     }
-  </script>
+
+    top3.forEach(f => {
+      const div = document.createElement('div');
+      div.className = 'product';
+
+      const colorBox = document.createElement('div');
+      colorBox.className = 'color-box';
+      colorBox.style.backgroundColor = f.hex;
+
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'product-info';
+
+      const link = document.createElement('a');
+      link.href = f.link;
+      link.target = "_blank";
+      link.textContent = f.nombre;
+
+      const hexSpan = document.createElement('div');
+      hexSpan.className = 'hex-code';
+      hexSpan.textContent = f.hex;
+
+      infoDiv.appendChild(link);
+      infoDiv.appendChild(hexSpan);
+
+      div.appendChild(colorBox);
+      div.appendChild(infoDiv);
+
+      resultsDiv.appendChild(div);
+    });
+  }
+
+  // Actualizar cuadro de color seleccionado
+  function actualizarColorSeleccionado(hex) {
+    const selectedColorDiv = document.getElementById('selectedColor');
+    selectedColorDiv.style.backgroundColor = hex;
+    selectedColorDiv.textContent = hex.toUpperCase();
+    selectedColorDiv.style.color = (getBrightness(hex) < 128) ? '#fff' : '#000';
+  }
+
+  // Calcular brillo para contraste texto
+  function getBrightness(hex) {
+    const rgb = hexToRgb(hex);
+    if(!rgb) return 255;
+    return (rgb.r * 299 + rgb.g * 587 + rgb.b * 114) / 1000;
+  }
+
+  // Evento input color
+  document.getElementById('colorPicker').addEventListener('input', (e) => {
+    const hex = e.target.value;
+    actualizarColorSeleccionado(hex);
+    buscarFilamentos(hex);
+  });
+
+  // Inicialización
+  mostrarFilamentos();
+  const initialColor = document.getElementById('colorPicker').value;
+  actualizarColorSeleccionado(initialColor);
+  buscarFilamentos(initialColor);
+</script>
+
 </body>
 </html>
+
 
